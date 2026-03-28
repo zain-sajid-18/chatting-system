@@ -2,9 +2,14 @@ import express from "express";
 
 const router=express.Router();
 
-router.get("/message",(req,res)=>
+router.get("/send",(req,res)=>
 {
-    console.log("Message router.");
+res.send("The message is sent.");
+});
+
+router.get("/receive",(req,res)=>
+{
+    res.send("The message is received.");
 })
 
 export default router;
