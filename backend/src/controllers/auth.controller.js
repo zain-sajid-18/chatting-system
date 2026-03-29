@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils.js";
+import { sendWelcomeEmail } from "../emails/emailHandlers.js";
+import 'dotenv/config';
 export const signup=async(req,res)=>
 {
     const {fullName,email,password}=req.body;
@@ -31,15 +33,25 @@ const salt=await bcrypt.genSalt(10);
         )
         if(newUser)
         {
-            generateToken(newUser._id,res)
-            await newUser.save();
+            const savedUser=await newUser.save();
+             generateToken(savedUser._id,res);
+
             res.status(201).json({message:"The user is created successfully..",
                 _id:newUser._id,
                 fullName:newUser.fullName,
                 email:newUser.email,
                 profilePic:newUser.profilePic
 
-            })
+            });
+
+            try{
+                await sendWelcomeEmail(savedUser.email,savedUser.fullName,process.env.CLIENTURL);
+
+            }
+            catch(error)
+            {
+                console.error("Failed to send welcome email",error);
+            }
 
         }
         else{
