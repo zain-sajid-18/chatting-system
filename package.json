@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build":"npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
-    "start":"npm run start --prefix backend"
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "npm run start --prefix backend"
   },
   "repository": {
     "type": "git",
@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/zain-sajid-18/chatting-system/issues"
   },
-  "homepage": "https://github.com/zain-sajid-18/chatting-system#readme"
+  "homepage": "https://github.com/zain-sajid-18/chatting-system#readme",
+  "dependencies": {
+    "cloudinary": "^2.5.1"
+  }
 }
