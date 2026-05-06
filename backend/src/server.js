@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import path from "path";
 import { generateToken } from "./lib/utils.js";
 import authRoutes from "./routes/auth.route.js";
@@ -7,7 +8,7 @@ import messageRoutes from "./routes/message.route.js";
 dotenv.config();
 import { connectDB } from "./lib/db.js";
 const _dirname=path.resolve();
-
+app.use(cookieParser());
 const PORT=process.env.PORT;
 const app=express();
 app.use(express.json());
