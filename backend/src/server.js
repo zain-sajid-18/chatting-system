@@ -8,9 +8,10 @@ import messageRoutes from "./routes/message.route.js";
 dotenv.config();
 import { connectDB } from "./lib/db.js";
 const _dirname=path.resolve();
+const app=express();
 app.use(cookieParser());
 const PORT=process.env.PORT;
-const app=express();
+
 app.use(express.json());
 app.use('/api/auth',authRoutes);
 app.use('/api/message',messageRoutes);
