@@ -72,7 +72,7 @@ const salt=await bcrypt.genSalt(10);
 export const login =async(req,res)=>
 {
 const {email,password}=req.body;
-if(!email||!password) return res.status(400).jspn({message:"The email and password is required.."});
+if(!email||!password) return res.status(400).json({message:"The email and password is required.."});
 try
 {
 const user=await User.findOne({email})
