@@ -12,6 +12,9 @@ export const useChatStore = create((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
   isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
+  friendRequests: [],
+  searchedUser: null,
+  isSearching: false,
 
   toggleSound: () => {
     localStorage.setItem("isSoundEnabled", !get().isSoundEnabled);
@@ -27,7 +30,7 @@ export const useChatStore = create((set, get) => ({
       const res = await axiosInstance.get("/message/contacts");
       set({ allContacts: res.data });
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       set({ isUsersLoading: false });
     }
@@ -38,7 +41,7 @@ export const useChatStore = create((set, get) => ({
       const res = await axiosInstance.get("/message/chats");
       set({ chats: res.data });
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Something went wrong");
     } finally {
       set({ isUsersLoading: false });
     }
@@ -111,5 +114,64 @@ export const useChatStore = create((set, get) => ({
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
+  },
+
+  searchUser: async (email) => {
+    set({ isSearching: true });
+    try {
+      const res = await axiosInstance.get(`/friend/search?email=${encodeURIComponent(email)}`);
+      set({ searchedUser: res.data });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "User not found");
+      set({ searchedUser: null });
+    } finally {
+      set({ isSearching: false });
+    }
+  },
+
+  sendFriendRequest: async (receiverId) => {
+    try {
+      await axiosInstance.post("/friend/request", { receiverId });
+      toast.success("Friend request sent!");
+      set((state) => ({
+        searchedUser: state.searchedUser ? { ...state.searchedUser, hasSentRequest: true } : null,
+      }));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  },
+
+  acceptFriendRequest: async (senderId) => {
+    try {
+      await axiosInstance.post("/friend/accept", { senderId });
+      toast.success("Friend request accepted!");
+      set((state) => ({
+        friendRequests: state.friendRequests.filter((req) => req.sender._id !== senderId),
+      }));
+      get().getAllContacts();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  },
+
+  rejectFriendRequest: async (senderId) => {
+    try {
+      await axiosInstance.post("/friend/reject", { senderId });
+      toast.success("Friend request rejected!");
+      set((state) => ({
+        friendRequests: state.friendRequests.filter((req) => req.sender._id !== senderId),
+      }));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  },
+
+  getFriendRequests: async () => {
+    try {
+      const res = await axiosInstance.get("/friend/requests");
+      set({ friendRequests: res.data });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
   },
 }));
