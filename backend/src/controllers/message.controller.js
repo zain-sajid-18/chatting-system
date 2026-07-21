@@ -7,11 +7,8 @@ import { getReceiverSocketId } from "../server.js";
 
 export const getAllContacts = async (req, res) => {
   try {
-    const loggedInUser = req.user._id;
-    const filteredUsers = await User.find({ _id: { $ne: loggedInUser } }).select(
-      "-password"
-    );
-    res.status(200).json(filteredUsers);
+    const loggedInUser = await User.findById(req.user._id).populate("friends", "-password -friendRequests -friends");
+    res.status(200).json(loggedInUser.friends);
   } catch (error) {
     logger.error("Error in getAllContacts controller:", error.message);
     return res.status(500).json({ message: "Internal Server Error" });

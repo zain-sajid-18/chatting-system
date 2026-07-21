@@ -13,6 +13,7 @@ import logger from "./lib/logger.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
+import friendRoutes from "./routes/friend.route.js";
 
 const __dirname = path.resolve();
 
@@ -81,6 +82,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
+app.use("/api/friend", friendRoutes);
 
 if (env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
