@@ -69,27 +69,21 @@ function FriendRequests() {
                     </div>
                   </div>
 
-                  <div className="min-w-0">
-                    <p className="text-slate-200 text-sm truncate">
-                      {req.sender.fullName}
-                    </p>
-                  </div>
+                  <p className="text-slate-200 text-sm truncate">
+                    {req.sender.fullName}
+                  </p>
                 </div>
 
                 <div className="flex gap-2 shrink-0">
                   <button
-                    onClick={() =>
-                      acceptFriendRequest(req.sender._id)
-                    }
+                    onClick={() => acceptFriendRequest(req.sender._id)}
                     className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                   >
                     <Check className="size-5" />
                   </button>
 
                   <button
-                    onClick={() =>
-                      rejectFriendRequest(req.sender._id)
-                    }
+                    onClick={() => rejectFriendRequest(req.sender._id)}
                     className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                   >
                     <X className="size-5" />
@@ -112,17 +106,13 @@ function FriendRequests() {
                     </div>
                   </div>
 
-                  <div className="min-w-0">
-                    <p className="text-slate-200 text-sm truncate">
-                      {req.receiver.fullName}
-                    </p>
-                  </div>
+                  <p className="text-slate-200 text-sm truncate">
+                    {req.receiver.fullName}
+                  </p>
                 </div>
 
                 <button
-                  onClick={() =>
-                    cancelFriendRequest(req.receiver._id)
-                  }
+                  onClick={() => cancelFriendRequest(req.receiver._id)}
                   className="bg-slate-600 hover:bg-slate-500 text-white p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
                 >
                   <XCircle className="size-5" />
