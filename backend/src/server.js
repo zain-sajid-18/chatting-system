@@ -112,3 +112,5 @@ server.listen(env.PORT, () => {
   logger.info(`Server running on port ${env.PORT}`);
   connectDB();
 });
+
+// Trigger nodemon restart

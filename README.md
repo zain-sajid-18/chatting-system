@@ -12,7 +12,6 @@ The project is deployed with a separate frontend and backend architecture and us
 ## 🔐 Authentication & Account Security
 
 * User registration with strong password validation
-* Password confirmation during signup
 * Secure password hashing using `bcryptjs`
 * JWT-based authentication
 * HTTP-only authentication cookies
@@ -49,7 +48,7 @@ Verification token is generated
         ↓
 Token is hashed and stored in MongoDB
         ↓
-Verification email is sent using Resend
+Verification email is sent using Brevo
         ↓
 User clicks verification link
         ↓
@@ -69,7 +68,7 @@ User can log in
 * Token expiration
 * Verification status tracking
 * Resend verification email functionality
-* Production email delivery using Resend
+* Production email delivery using Brevo
 
 ---
 
@@ -178,6 +177,7 @@ Mobile-specific improvements include:
 * Responsive contact list
 * Responsive friend management
 * Adaptive spacing and UI components
+* Touch-friendly interactive elements with minimum 44px targets
 
 ---
 
@@ -250,7 +250,7 @@ Securely hashes user passwords before database storage.
 
 * MongoDB Atlas — Database
 * Cloudinary — Image storage
-* Resend — Email delivery
+* Brevo — Email delivery
 * Render — Backend deployment
 * Vercel — Frontend deployment
 
@@ -276,11 +276,11 @@ chatting-system/
 │   │   │
 │   │   ├── lib/
 │   │   │   ├── arcjet.js
+│   │   │   ├── brevo.js
 │   │   │   ├── cloudinary.js
 │   │   │   ├── db.js
 │   │   │   ├── env.js
 │   │   │   ├── logger.js
-│   │   │   ├── resend.js
 │   │   │   └── utils.js
 │   │   │
 │   │   ├── middleware/
@@ -298,7 +298,6 @@ chatting-system/
 │   │   │
 │   │   └── server.js
 │   │
-│   ├── .env.example
 │   ├── package.json
 │   └── package-lock.json
 │
@@ -309,11 +308,16 @@ chatting-system/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── ChatContainer.jsx
+│   │   │   ├── ChatHeader.jsx
 │   │   │   ├── FriendRequests.jsx
 │   │   │   ├── FriendSearch.jsx
 │   │   │   ├── MessageInput.jsx
 │   │   │   ├── ProfileHeader.jsx
-│   │   │   └── ProfileModal.jsx
+│   │   │   ├── ProfileModal.jsx
+│   │   │   ├── ActiveTabSwitch.jsx
+│   │   │   ├── ContactList.jsx
+│   │   │   ├── ChatsList.jsx
+│   │   │   └── others...
 │   │   │
 │   │   ├── hooks/
 │   │   │
@@ -323,7 +327,7 @@ chatting-system/
 │   │   ├── pages/
 │   │   │   ├── ChatPage.jsx
 │   │   │   ├── LoginPage.jsx
-│   │   │   ├── SignupPage.jsx
+│   │   │   ├── SignUpPage.jsx
 │   │   │   └── VerifyEmail.jsx
 │   │   │
 │   │   ├── store/
@@ -351,8 +355,8 @@ Make sure the following are installed:
 * Node.js
 * MongoDB Atlas account or local MongoDB
 * Cloudinary account
-* Resend account
-* Arcjet account
+* Brevo account
+* Arcjet account (optional)
 
 ---
 
@@ -370,13 +374,31 @@ Install dependencies:
 npm install
 ```
 
-Create an environment file:
+Create an environment file (`.env`):
 
-```bash
-.env
+Use the following as a reference and configure the required environment variables:
+
+```env
+NODE_ENV=development
+PORT=3000
+
+MONGO_URL=your_mongodb_connection_string
+
+JWT_SECRET=your_jwt_secret
+
+CLIENT_URL=http://localhost:5173
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+BREVO_API_KEY=your_brevo_api_key
+EMAIL_FROM=your-email@example.com
+EMAIL_FROM_NAME=Chatting System
+
+ARCJET_KEY=your_arcjet_key
+ARCJET_ENVIRONMENT=development
 ```
-
-Use `.env.example` as a reference and configure the required environment variables.
 
 Start the development server:
 
@@ -406,6 +428,12 @@ Install dependencies:
 npm install
 ```
 
+Create an environment file (`.env`):
+
+```env
+VITE_API_URL=http://localhost:3000/api
+```
+
 Start the development server:
 
 ```bash
@@ -424,7 +452,7 @@ Example backend environment variables:
 NODE_ENV=development
 PORT=3000
 
-MONGODB_URI=your_mongodb_connection_string
+MONGO_URL=your_mongodb_connection_string
 
 JWT_SECRET=your_jwt_secret
 
@@ -434,17 +462,18 @@ CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-RESEND_API_KEY=your_resend_api_key
+BREVO_API_KEY=your_brevo_api_key
+EMAIL_FROM=your-email@example.com
+EMAIL_FROM_NAME=Chatting System
 
 ARCJET_KEY=your_arcjet_key
-ARCJET_ENV=development
+ARCJET_ENVIRONMENT=development
 ```
 
 ## Frontend
 
 ```env
 VITE_API_URL=http://localhost:3000/api
-VITE_SOCKET_URL=http://localhost:3000
 ```
 
 > Never commit real secrets, API keys, passwords, or private credentials to GitHub.
@@ -469,8 +498,8 @@ Base URL:
 | GET    | `/check`               | Check authenticated user  |
 | POST   | `/update-profile`      | Update profile picture    |
 | DELETE | `/delete`              | Delete account            |
-| GET    | `/verify-email/:token` | Verify email              |
-| POST   | `/resend-verification` | Resend verification email |
+| POST   | `/verify-email`        | Verify email (via query params: ?token=...&email=...) |
+| POST   | `/resend-verification-email` | Resend verification email |
 
 ---
 
@@ -491,7 +520,6 @@ Base URL:
 | POST   | `/cancel`        | Cancel sent request   |
 | GET    | `/requests`      | Get received requests |
 | GET    | `/sent-requests` | Get sent requests     |
-| GET    | `/list`          | Get friends list      |
 
 ---
 
@@ -570,7 +598,7 @@ The production application is deployed using separate services.
                         │
                         ▼
                    ┌────────┐
-                   │ Resend │
+                   │ Brevo  │
                    │ Emails │
                    └────────┘
 ```
@@ -626,7 +654,7 @@ Test the deployed application on a mobile device.
 This project was improved from a basic chat application into a more production-oriented system by adding:
 
 * Real-time Socket.IO communication
-* Email verification
+* Email verification (Brevo)
 * Friend-request-based communication
 * Secure JWT authentication
 * HTTP-only cookies
@@ -645,6 +673,8 @@ This project was improved from a basic chat application into a more production-o
 * Typing indicators
 * Account deletion
 * Production deployment
+* Full-screen chat layout
+* Consistent navigation buttons
 
 ---
 

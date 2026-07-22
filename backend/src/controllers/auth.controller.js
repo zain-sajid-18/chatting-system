@@ -542,6 +542,7 @@ export const logout = async (
       secure:
         env.NODE_ENV ===
         "production",
+      path: "/"
     }
   );
 
