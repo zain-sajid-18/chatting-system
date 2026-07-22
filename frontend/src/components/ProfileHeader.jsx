@@ -1,7 +1,8 @@
 import { useState, useRef } from "react";
-import { LogOutIcon, VolumeOffIcon, Volume2Icon } from "lucide-react";
+import { LogOutIcon, VolumeOffIcon, Volume2Icon, User } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useChatStore } from "../store/useChatStore";
+import ProfileModal from "./ProfileModal";
 
 const mouseClickSound = new Audio("/sounds/mouse-click.mp3");
 
@@ -9,6 +10,7 @@ function ProfileHeader() {
   const { logout, authUser, updateProfile } = useAuthStore();
   const { isSoundEnabled, toggleSound } = useChatStore();
   const [selectedImg, setSelectedImg] = useState(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -67,6 +69,14 @@ function ProfileHeader() {
 
         {/* BUTTONS */}
         <div className="flex gap-4 items-center">
+          {/* PROFILE BTN */}
+          <button
+            className="text-slate-400 hover:text-slate-200 transition-colors"
+            onClick={() => setIsProfileModalOpen(true)}
+          >
+            <User className="size-5" />
+          </button>
+
           {/* LOGOUT BTN */}
           <button
             className="text-slate-400 hover:text-slate-200 transition-colors"
@@ -93,6 +103,11 @@ function ProfileHeader() {
           </button>
         </div>
       </div>
+
+      <ProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 
 import { resendClient, sender } from "../lib/resend.js";
-import { createWelcomeEmailTemplate } from "./emailTemplate.js";
+import { createWelcomeEmailTemplate, createVerificationEmailTemplate } from "./emailTemplate.js";
 import logger from "../lib/logger.js";
 
 export const sendWelcomeEmail = async (email, name, clientURL) => {
@@ -24,5 +24,29 @@ export const sendWelcomeEmail = async (email, name, clientURL) => {
     }
   } catch (error) {
     logger.error("Error in sendWelcomeEmail:", error);
+  }
+};
+
+export const sendVerificationEmail = async (email, name, verificationUrl) => {
+  if (!resendClient) {
+    logger.warn("Skipping verification email: RESEND_API_KEY not set.");
+    return;
+  }
+
+  try {
+    const { data, error } = await resendClient.emails.send({
+      from: `${sender.name} <${sender.email}>`,
+      to: email,
+      subject: "Verify your email address",
+      html: createVerificationEmailTemplate(name, verificationUrl),
+    });
+
+    if (error) {
+      logger.error("Error sending verification email:", error);
+    } else {
+      logger.info("Verification Email sent successfully", data);
+    }
+  } catch (error) {
+    logger.error("Error in sendVerificationEmail:", error);
   }
 };

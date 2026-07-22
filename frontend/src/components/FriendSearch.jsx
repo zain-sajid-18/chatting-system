@@ -4,7 +4,7 @@ import { useChatStore } from "../store/useChatStore";
 
 function FriendSearch() {
   const [searchEmail, setSearchEmail] = useState("");
-  const { searchUser, searchedUser, isSearching, sendFriendRequest, setSelectedUser } = useChatStore();
+  const { searchUser, searchedUser, isSearching, sendFriendRequest, cancelFriendRequest, setSelectedUser } = useChatStore();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -54,9 +54,12 @@ function FriendSearch() {
                 Chat
               </button>
             ) : searchedUser.hasSentRequest ? (
-              <span className="text-slate-400 text-sm flex items-center gap-1">
-                <Check className="size-4" /> Request Sent
-              </span>
+              <button
+                onClick={() => cancelFriendRequest(searchedUser.user._id)}
+                className="bg-slate-600 hover:bg-slate-500 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-1"
+              >
+                <X className="size-4" /> Cancel Request
+              </button>
             ) : (
               <button
                 onClick={() => sendFriendRequest(searchedUser.user._id)}
