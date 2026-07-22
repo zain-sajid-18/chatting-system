@@ -19,8 +19,6 @@ function FriendRequests() {
     getSentFriendRequests();
   }, [getFriendRequests, getSentFriendRequests]);
 
-  if (friendRequests.length === 0 && sentFriendRequests.length === 0) return null;
-
   return (
     <div className="p-4 border-b border-slate-700/50">
       <div className="flex items-center justify-between mb-3">
@@ -29,21 +27,21 @@ function FriendRequests() {
       
       <div className="flex gap-2 mb-3">
         <button
-        onClick={() => setActiveTab("received")}
-        className={`text-xs px-3 py-2 rounded-full transition-colors min-h-[36px] ${activeTab === "received" 
-          ? "bg-cyan-500/20 text-cyan-400" 
-          : "text-slate-400 hover:text-slate-300"}`}
-      >
-        Received ({friendRequests.length})
-      </button>
-      <button
-        onClick={() => setActiveTab("sent")}
-        className={`text-xs px-3 py-2 rounded-full transition-colors min-h-[36px] ${activeTab === "sent" 
-          ? "bg-cyan-500/20 text-cyan-400" 
-          : "text-slate-400 hover:text-slate-300"}`}
-      >
-        Sent ({sentFriendRequests.length})
-      </button>
+          onClick={() => setActiveTab("received")}
+          className={`text-xs px-3 py-2 rounded-full transition-colors min-h-[36px] ${activeTab === "received" 
+            ? "bg-cyan-500/20 text-cyan-400" 
+            : "text-slate-400 hover:text-slate-300"}`}
+        >
+          Received ({friendRequests.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("sent")}
+          className={`text-xs px-3 py-2 rounded-full transition-colors min-h-[36px] ${activeTab === "sent" 
+            ? "bg-cyan-500/20 text-cyan-400" 
+            : "text-slate-400 hover:text-slate-300"}`}
+        >
+          Sent ({sentFriendRequests.length})
+        </button>
       </div>
 
       <div className="space-y-2">

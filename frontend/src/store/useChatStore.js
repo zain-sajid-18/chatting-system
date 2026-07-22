@@ -157,8 +157,9 @@ export const useChatStore = create((set, get) => ({
       await axiosInstance.post("/friend/request", { receiverId });
       toast.success("Friend request sent!");
       set((state) => ({
-        searchedUser: state.searchedUser ? { ...state.searchedUser, hasSentRequest: true } : null,
+        searchedUser: null,
       }));
+      get().getSentFriendRequests();
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     }

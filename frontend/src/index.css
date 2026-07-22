@@ -8,6 +8,15 @@
   syntax: "<angle>";
 }
 
+* {
+  touch-action: manipulation;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
 .input {
   @apply w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-slate-200 placeholder-slate-400 focus:ring-2 focus:ring-cyan-500 focus:border-transparent;
 }
