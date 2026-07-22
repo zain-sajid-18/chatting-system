@@ -5,6 +5,7 @@ import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
+import { Check, CheckCheck } from "lucide-react";
 
 function ChatContainer() {
   const {
@@ -14,6 +15,7 @@ function ChatContainer() {
     isMessagesLoading,
     subscribeToMessages,
     unsubscribeFromMessages,
+    isTyping,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
@@ -54,15 +56,31 @@ function ChatContainer() {
                     <img src={msg.image} alt="Shared" className="rounded-lg h-48 object-cover" />
                   )}
                   {msg.text && <p className="mt-2">{msg.text}</p>}
-                  <p className="text-xs mt-1 opacity-75 flex items-center gap-1">
+                  <p className="text-xs mt-1 opacity-75 flex items-center gap-1 justify-end">
                     {new Date(msg.createdAt).toLocaleTimeString(undefined, {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
+                    {msg.senderId === authUser._id && (
+                      msg.isSeen ? (
+                        <CheckCheck className="w-3 h-3 text-cyan-300" />
+                      ) : (
+                        <Check className="w-3 h-3 text-slate-300" />
+                      )
+                    )}
                   </p>
                 </div>
               </div>
             ))}
+            {isTyping && (
+              <div className="chat chat-start">
+                <div className="chat-bubble bg-slate-800 text-slate-200 flex items-center gap-1">
+                  <span className="animate-pulse">●</span>
+                  <span className="animate-pulse delay-100">●</span>
+                  <span className="animate-pulse delay-200">●</span>
+                </div>
+              </div>
+            )}
             {/* 👇 scroll target */}
             <div ref={messageEndRef} />
           </div>

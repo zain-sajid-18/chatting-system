@@ -20,12 +20,29 @@ export const getMessagesByUserID = async (req, res) => {
     const myId = req.user._id;
     const { id: userToChatId } = req.params;
 
+    // Mark all messages from userToChatId to me as seen
+    await Message.updateMany(
+      { senderId: userToChatId, receiverId: myId, isSeen: false },
+      { isSeen: true, seenAt: new Date() }
+    );
+
     const messages = await Message.find({
       $or: [
         { senderId: myId, receiverId: userToChatId },
         { senderId: userToChatId, receiverId: myId },
       ],
     });
+
+    // Emit an event to the sender that their messages were seen
+    const io = req.app.get("io");
+    const receiverSocketId = getReceiverSocketId(userToChatId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("messagesSeen", {
+        userId: myId,
+        seenAt: new Date(),
+      });
+    }
+
     res.status(200).json(messages);
   } catch (error) {
     logger.error("Error in getMessages controller:", error.message);

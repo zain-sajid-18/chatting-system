@@ -3,7 +3,7 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.MODE === "development" ? "http://localhost:3000" : "");
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isCheckingAuth: true,
@@ -31,7 +31,7 @@ export const useAuthStore = create((set, get) => ({
       const res = await axiosInstance.post("/auth/signup", data);
       set({ authUser: res.data });
 
-      toast.success("Account created successfully!");
+      toast.success(res.data.message || "Account created successfully! Please check your email.");
       get().connectSocket();
     } catch (error) {
       const errorMessage =
@@ -82,6 +82,31 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       console.log("Error in update profile:", error);
       toast.error(error.response.data.message);
+    }
+  },
+
+  resendVerificationEmail: async () => {
+    try {
+      const res = await axiosInstance.post("/auth/resend-verification-email");
+      toast.success(res.data.message);
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to resend verification email";
+      toast.error(errorMessage);
+      console.error("Resend verification email error:", error);
+    }
+  },
+
+  deleteAccount: async () => {
+    try {
+      const res = await axiosInstance.delete("/auth/delete");
+      toast.success(res.data.message);
+      set({ authUser: null });
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to delete account";
+      toast.error(errorMessage);
+      console.error("Delete account error:", error);
     }
   },
 

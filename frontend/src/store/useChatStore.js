@@ -13,8 +13,10 @@ export const useChatStore = create((set, get) => ({
   isMessagesLoading: false,
   isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
   friendRequests: [],
+  sentFriendRequests: [],
   searchedUser: null,
   isSearching: false,
+  isTyping: false,
 
   toggleSound: () => {
     localStorage.setItem("isSoundEnabled", !get().isSoundEnabled);
@@ -109,11 +111,32 @@ export const useChatStore = create((set, get) => ({
         notificationSound.play().catch((e) => console.log("Audio play failed:", e));
       }
     });
+
+    socket.on("messagesSeen", ({ userId }) => {
+      if (userId !== selectedUser._id) return;
+
+      const currentMessages = get().messages;
+      const updatedMessages = currentMessages.map(msg => {
+        if (msg.senderId === useAuthStore.getState().authUser._id && !msg.isSeen) {
+          return { ...msg, isSeen: true, seenAt: new Date() };
+        }
+        return msg;
+      });
+
+      set({ messages: updatedMessages });
+    });
+
+    socket.on("typing", ({ senderId, isTyping }) => {
+      if (senderId !== selectedUser._id) return;
+      set({ isTyping });
+    });
   },
 
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
+    socket.off("messagesSeen");
+    socket.off("typing");
   },
 
   searchUser: async (email) => {
@@ -170,6 +193,28 @@ export const useChatStore = create((set, get) => ({
     try {
       const res = await axiosInstance.get("/friend/requests");
       set({ friendRequests: res.data });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  },
+
+  getSentFriendRequests: async () => {
+    try {
+      const res = await axiosInstance.get("/friend/sent-requests");
+      set({ sentFriendRequests: res.data });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong");
+    }
+  },
+
+  cancelFriendRequest: async (receiverId) => {
+    try {
+      await axiosInstance.post("/friend/cancel", { receiverId });
+      toast.success("Friend request canceled!");
+      set((state) => ({
+        sentFriendRequests: state.sentFriendRequests.filter((req) => req.receiver._id !== receiverId),
+        searchedUser: state.searchedUser ? { ...state.searchedUser, hasSentRequest: false } : null,
+      }));
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     }

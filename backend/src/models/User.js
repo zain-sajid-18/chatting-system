@@ -6,10 +6,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
     },
     fullName: {
       type: String,
       required: true,
+      trim: true,
     },
     password: {
       type: String,
@@ -39,6 +42,29 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    sentFriendRequests: [
+      {
+        receiver: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        status: {
+          type: String,
+          enum: ["pending", "accepted", "rejected"],
+          default: "pending",
+        },
+      },
+    ],
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+    },
+    verificationTokenExpiresAt: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

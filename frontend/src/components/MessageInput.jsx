@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import useKeyboardSound from "../hooks/useKeyboardSound";
 import { useChatStore } from "../store/useChatStore";
+import { useAuthStore } from "../store/useAuthStore";
 import toast from "react-hot-toast";
 import { ImageIcon, SendIcon, XIcon } from "lucide-react";
 
@@ -8,15 +9,34 @@ function MessageInput() {
   const { playRandomKeyStrokeSound } = useKeyboardSound();
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef(null);
 
   const fileInputRef = useRef(null);
 
-  const { sendMessage, isSoundEnabled } = useChatStore();
+  const { sendMessage, isSoundEnabled, selectedUser } = useChatStore();
+  const { socket, authUser } = useAuthStore();
+
+  const stopTyping = () => {
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    setIsTyping(false);
+    if (socket && selectedUser) {
+      socket.emit("typing", {
+        senderId: authUser._id,
+        receiverId: selectedUser._id,
+        isTyping: false,
+      });
+    }
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (!text.trim() && !imagePreview) return;
     if (isSoundEnabled) playRandomKeyStrokeSound();
+
+    stopTyping();
 
     sendMessage({
       text: text.trim(),
@@ -26,6 +46,32 @@ function MessageInput() {
     setImagePreview("");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  const handleTextChange = (e) => {
+    setText(e.target.value);
+    if (isSoundEnabled) playRandomKeyStrokeSound();
+
+    if (!isTyping && socket && selectedUser) {
+      setIsTyping(true);
+      socket.emit("typing", {
+        senderId: authUser._id,
+        receiverId: selectedUser._id,
+        isTyping: true,
+      });
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(stopTyping, 1000);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopTyping();
+    };
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -69,10 +115,7 @@ function MessageInput() {
         <input
           type="text"
           value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-            isSoundEnabled && playRandomKeyStrokeSound();
-          }}
+          onChange={handleTextChange}
           className="flex-1 bg-slate-800/50 border border-slate-700/50 rounded-lg py-2 px-4"
           placeholder="Type your message..."
         />

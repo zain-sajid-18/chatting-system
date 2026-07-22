@@ -34,8 +34,9 @@ export const sendFriendRequest = async (req, res) => {
       return res.status(400).json({ message: "You can't send a friend request to yourself" });
     }
 
+    const sender = await User.findById(senderId);
     const receiver = await User.findById(receiverId);
-    if (!receiver) {
+    if (!receiver || !sender) {
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -52,11 +53,41 @@ export const sendFriendRequest = async (req, res) => {
     }
 
     receiver.friendRequests.push({ sender: senderId, status: "pending" });
+    sender.sentFriendRequests.push({ receiver: receiverId, status: "pending" });
     await receiver.save();
+    await sender.save();
 
     res.status(200).json({ message: "Friend request sent successfully" });
   } catch (error) {
     logger.error("Error in sendFriendRequest controller:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const cancelFriendRequest = async (req, res) => {
+  try {
+    const { receiverId } = req.body;
+    const senderId = req.user._id;
+
+    const receiver = await User.findById(receiverId);
+    const sender = await User.findById(senderId);
+    if (!receiver || !sender) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    receiver.friendRequests = receiver.friendRequests.filter(
+      req => !(req.sender.toString() === senderId.toString() && req.status === "pending")
+    );
+    sender.sentFriendRequests = sender.sentFriendRequests.filter(
+      req => !(req.receiver.toString() === receiverId.toString() && req.status === "pending")
+    );
+
+    await receiver.save();
+    await sender.save();
+
+    res.status(200).json({ message: "Friend request canceled" });
+  } catch (error) {
+    logger.error("Error in cancelFriendRequest controller:", error.message);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -76,6 +107,9 @@ export const acceptFriendRequest = async (req, res) => {
     const requestIndex = receiver.friendRequests.findIndex(
       req => req.sender.toString() === senderId.toString() && req.status === "pending"
     );
+    const sentRequestIndex = sender.sentFriendRequests.findIndex(
+      req => req.receiver.toString() === receiverId.toString() && req.status === "pending"
+    );
 
     if (requestIndex === -1) {
       return res.status(404).json({ message: "Friend request not found" });
@@ -84,6 +118,9 @@ export const acceptFriendRequest = async (req, res) => {
     receiver.friendRequests[requestIndex].status = "accepted";
     receiver.friends.push(senderId);
     sender.friends.push(receiverId);
+    if (sentRequestIndex !== -1) {
+      sender.sentFriendRequests[sentRequestIndex].status = "accepted";
+    }
 
     await receiver.save();
     await sender.save();
@@ -101,20 +138,39 @@ export const rejectFriendRequest = async (req, res) => {
     const receiverId = req.user._id;
 
     const receiver = await User.findById(receiverId);
+    const sender = await User.findById(senderId);
 
-    if (!receiver) {
+    if (!receiver || !sender) {
       return res.status(404).json({ message: "User not found" });
     }
 
     receiver.friendRequests = receiver.friendRequests.filter(
       req => !(req.sender.toString() === senderId.toString() && req.status === "pending")
     );
+    sender.sentFriendRequests = sender.sentFriendRequests.filter(
+      req => !(req.receiver.toString() === receiverId.toString() && req.status === "pending")
+    );
 
     await receiver.save();
+    await sender.save();
 
     res.status(200).json({ message: "Friend request rejected" });
   } catch (error) {
     logger.error("Error in rejectFriendRequest controller:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getSentFriendRequests = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .populate("sentFriendRequests.receiver", "-password -friendRequests -friends");
+
+    const pendingSentRequests = user.sentFriendRequests.filter(req => req.status === "pending");
+
+    res.status(200).json(pendingSentRequests);
+  } catch (error) {
+    logger.error("Error in getSentFriendRequests controller:", error.message);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
