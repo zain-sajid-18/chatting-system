@@ -15,10 +15,10 @@ function ChatPage() {
   const { activeTab, selectedUser, allContacts, setSelectedUser } = useChatStore();
 
   return (
-    <div className="relative w-full max-w-7xl h-[90vh]">
-      <BorderAnimatedContainer>
+    <div className="relative w-full max-w-7xl h-[100dvh] md:h-[90vh] p-0 md:p-2">
+      <BorderAnimatedContainer className="h-full">
         {/* LEFT SIDE - Contacts (only show on mobile if no selected user) */}
-        <div className={`${selectedUser ? "hidden md:flex" : "flex"} w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex-col`}>
+        <div className={`${selectedUser ? "hidden md:flex" : "flex"} w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex-col h-full`}>
           <ProfileHeader />
           <FriendSearch />
           <FriendRequests />
@@ -39,14 +39,14 @@ function ChatPage() {
         </div>
 
         {/* RIGHT SIDE - Chat (show on mobile if selected user, with back button) */}
-        <div className={`${selectedUser ? "flex" : "hidden md:flex"} flex-1 flex-col bg-slate-900/50 backdrop-blur-sm`}>
+        <div className={`${selectedUser ? "flex" : "hidden md:flex"} flex-1 flex-col bg-slate-900/50 backdrop-blur-sm h-full overflow-hidden`}>
           {/* Mobile back button */}
           {selectedUser && (
             <button
               onClick={() => setSelectedUser(null)}
-              className="md:hidden flex items-center gap-2 p-4 text-slate-200 hover:bg-slate-800/50 transition-colors"
+              className="md:hidden flex items-center gap-2 p-4 text-slate-200 hover:bg-slate-800/50 transition-colors min-h-[44px]"
             >
-              <ArrowLeft className="size-5" />
+              <ArrowLeft className="size-6" />
               <span>Back</span>
             </button>
           )}

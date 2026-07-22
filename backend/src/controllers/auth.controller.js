@@ -46,7 +46,7 @@ export const signup = async (
 
     const normalizedEmail =
       email.toLowerCase().trim();
-
+    logger.info(`1. Signup started for email: ${normalizedEmail}`);
 
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
@@ -141,7 +141,7 @@ export const signup = async (
 
 
     await newUser.save();
-
+    logger.info(`2. User saved successfully for email: ${normalizedEmail}`);
 
     const verificationUrl =
       `${env.CLIENT_URL}/verify-email` +
@@ -152,13 +152,13 @@ export const signup = async (
 
 
     try {
-
+      logger.info(`3. Verification email send started for email: ${normalizedEmail}`);
       await sendVerificationEmail(
         newUser.email,
         newUser.fullName,
         verificationUrl
       );
-
+      logger.info(`User created + email sent for: ${normalizedEmail}`);
     } catch (error) {
 
       logger.error(
@@ -166,6 +166,7 @@ export const signup = async (
           error.message
         }`
       );
+      logger.error(`User created + email failed for: ${normalizedEmail}`);
 
       /*
        * Important:
