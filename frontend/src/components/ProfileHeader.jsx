@@ -29,13 +29,13 @@ function ProfileHeader() {
   };
 
   return (
-    <div className="p-6 border-b border-slate-700/50">
+    <div className="p-3 md:p-6 border-b border-slate-700/50 shrink-0">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           {/* AVATAR */}
           <div className="avatar online">
             <button
-              className="size-14 rounded-full overflow-hidden relative group"
+              className="size-12 md:size-14 rounded-full overflow-hidden relative group"
               onClick={() => fileInputRef.current.click()}
             >
               <img
@@ -58,8 +58,8 @@ function ProfileHeader() {
           </div>
 
           {/* USERNAME & ONLINE TEXT */}
-          <div>
-            <h3 className="text-slate-200 font-medium text-base max-w-[180px] truncate">
+          <div className="min-w-0">
+            <h3 className="text-slate-200 font-medium text-base truncate">
               {authUser.fullName}
             </h3>
 
@@ -68,10 +68,10 @@ function ProfileHeader() {
         </div>
 
         {/* BUTTONS */}
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-2 md:gap-4 items-center">
           {/* PROFILE BTN */}
           <button
-            className="text-slate-400 hover:text-slate-200 transition-colors"
+            className="text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
             onClick={() => setIsProfileModalOpen(true)}
           >
             <User className="size-5" />
@@ -79,7 +79,7 @@ function ProfileHeader() {
 
           {/* LOGOUT BTN */}
           <button
-            className="text-slate-400 hover:text-slate-200 transition-colors"
+            className="text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
             onClick={logout}
           >
             <LogOutIcon className="size-5" />
@@ -87,7 +87,7 @@ function ProfileHeader() {
 
           {/* SOUND TOGGLE BTN */}
           <button
-            className="text-slate-400 hover:text-slate-200 transition-colors"
+            className="text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
             onClick={() => {
               // play click sound before toggling
               mouseClickSound.currentTime = 0; // reset to start

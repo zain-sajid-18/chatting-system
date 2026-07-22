@@ -1,5 +1,5 @@
+import { useEffect } from "react";
 import { useChatStore } from "../store/useChatStore";
-import { ArrowLeft } from "lucide-react";
 
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import ProfileHeader from "../components/ProfileHeader";
@@ -12,19 +12,24 @@ import FriendSearch from "../components/FriendSearch";
 import FriendRequests from "../components/FriendRequests";
 
 function ChatPage() {
-  const { activeTab, selectedUser, allContacts, setSelectedUser } = useChatStore();
+  const { activeTab, selectedUser, allContacts, getAllContacts, getMyChatPartners } = useChatStore();
+
+  useEffect(() => {
+    getAllContacts();
+    getMyChatPartners();
+  }, [getAllContacts, getMyChatPartners]);
 
   return (
-    <div className="relative w-full max-w-7xl h-[90vh]">
+    <div className="w-full h-full md:h-[90vh] md:max-w-7xl">
       <BorderAnimatedContainer>
         {/* LEFT SIDE - Contacts (only show on mobile if no selected user) */}
-        <div className={`${selectedUser ? "hidden md:flex" : "flex"} w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex-col`}>
+        <div className={`${selectedUser ? "hidden md:flex" : "flex"} w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex-col h-full`}>
           <ProfileHeader />
           <FriendSearch />
           <FriendRequests />
           <ActiveTabSwitch />
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-2">
             {activeTab === "chats" ? (
               <ChatsList />
             ) : allContacts.length > 0 ? (
@@ -38,18 +43,8 @@ function ChatPage() {
           </div>
         </div>
 
-        {/* RIGHT SIDE - Chat (show on mobile if selected user, with back button) */}
-        <div className={`${selectedUser ? "flex" : "hidden md:flex"} flex-1 flex-col bg-slate-900/50 backdrop-blur-sm`}>
-          {/* Mobile back button */}
-          {selectedUser && (
-            <button
-              onClick={() => setSelectedUser(null)}
-              className="md:hidden flex items-center gap-2 p-4 text-slate-200 hover:bg-slate-800/50 transition-colors"
-            >
-              <ArrowLeft className="size-5" />
-              <span>Back</span>
-            </button>
-          )}
+        {/* RIGHT SIDE - Chat (show on mobile if selected user) */}
+        <div className={`${selectedUser ? "flex" : "hidden md:flex"} flex-1 flex-col bg-slate-900/50 backdrop-blur-sm h-full`}>
           {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
         </div>
       </BorderAnimatedContainer>
