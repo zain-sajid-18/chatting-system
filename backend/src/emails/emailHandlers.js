@@ -1,52 +1,94 @@
-
-import { resendClient, sender } from "../lib/resend.js";
-import { createWelcomeEmailTemplate, createVerificationEmailTemplate } from "./emailTemplate.js";
+import { brevoClient, sender } from "../lib/brevo.js";
+import {
+  createVerificationEmailTemplate,
+  createWelcomeEmailTemplate,
+} from "./emailTemplate.js";
 import logger from "../lib/logger.js";
 
-export const sendWelcomeEmail = async (email, name, clientURL) => {
-  if (!resendClient) {
-    logger.warn("Skipping welcome email: RESEND_API_KEY not set.");
-    return;
+const sendEmail = async ({
+  to,
+  name,
+  subject,
+  html,
+}) => {
+  if (!brevoClient) {
+    logger.warn(
+      "Email skipped because BREVO_API_KEY is not configured."
+    );
+
+    return null;
   }
 
   try {
-    const { data, error } = await resendClient.emails.send({
-      from: `${sender.name} <${sender.email}>`,
-      to: email,
-      subject: "Welcome to my Chatting system.",
-      html: createWelcomeEmailTemplate(name, clientURL),
-    });
+    const response =
+      await brevoClient.transactionalEmails.sendTransacEmail({
+        sender: {
+          email: sender.email,
+          name: sender.name,
+        },
 
-    if (error) {
-      logger.error("Error sending welcome email:", error);
-    } else {
-      logger.info("Welcome Email sent successfully", data);
-    }
+        to: [
+          {
+            email: to,
+            name,
+          },
+        ],
+
+        subject,
+
+        htmlContent: html,
+      });
+
+    logger.info(
+      `Email sent successfully to ${to}. Message ID: ${response.messageId}`
+    );
+
+    return response;
   } catch (error) {
-    logger.error("Error in sendWelcomeEmail:", error);
+    logger.error(
+      `Failed to send email to ${to}: ${
+        error?.message || error
+      }`
+    );
+
+    throw error;
   }
 };
 
-export const sendVerificationEmail = async (email, name, verificationUrl) => {
-  if (!resendClient) {
-    logger.warn("Skipping verification email: RESEND_API_KEY not set.");
-    return;
-  }
+export const sendVerificationEmail = async (
+  email,
+  name,
+  verificationUrl
+) => {
+  return sendEmail({
+    to: email,
+    name,
 
-  try {
-    const { data, error } = await resendClient.emails.send({
-      from: `${sender.name} <${sender.email}>`,
-      to: email,
-      subject: "Verify your email address",
-      html: createVerificationEmailTemplate(name, verificationUrl),
-    });
+    subject:
+      "Verify Your Email - Chatting System",
 
-    if (error) {
-      logger.error("Error sending verification email:", error);
-    } else {
-      logger.info("Verification Email sent successfully", data);
-    }
-  } catch (error) {
-    logger.error("Error in sendVerificationEmail:", error);
-  }
+    html: createVerificationEmailTemplate(
+      name,
+      verificationUrl
+    ),
+  });
+};
+
+export const sendWelcomeEmail = async (
+  email,
+  name,
+  clientURL
+) => {
+  return sendEmail({
+    to: email,
+    name,
+
+    subject:
+      "Welcome to Chatting System",
+
+    html: createWelcomeEmailTemplate(
+      name,
+      clientURL
+    ),
+  });
 };
