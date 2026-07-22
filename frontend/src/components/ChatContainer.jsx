@@ -17,17 +17,21 @@ function ChatContainer() {
     unsubscribeFromMessages,
     isTyping,
   } = useChatStore();
+
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
-  const scrollContainerRef = useRef(null);
 
   useEffect(() => {
     getMessagesByUserId(selectedUser._id);
     subscribeToMessages();
 
-    // clean up
     return () => unsubscribeFromMessages();
-  }, [selectedUser, getMessagesByUserId, subscribeToMessages, unsubscribeFromMessages]);
+  }, [
+    selectedUser,
+    getMessagesByUserId,
+    subscribeToMessages,
+    unsubscribeFromMessages,
+  ]);
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -36,20 +40,18 @@ function ChatContainer() {
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full overflow-hidden">
       <ChatHeader />
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-8 touch-pan-y">
+
+      <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-8 touch-pan-y">
         {messages.length > 0 && !isMessagesLoading ? (
           <div className="max-w-3xl mx-auto space-y-3 md:space-y-6">
-    <div className="flex-1 flex flex-col h-full overflow-hidden">
-      <ChatHeader />
-      <div className="flex-1 px-4 md:px-6 overflow-y-auto py-6 md:py-8">
-        {messages.length > 0 && !isMessagesLoading ? (
-          <div className="max-w-3xl mx-auto space-y-4 md:space-y-6">
             {messages.map((msg) => (
               <div
                 key={msg._id}
-                className={`chat ${msg.senderId === authUser._id ? "chat-end" : "chat-start"}`}
+                className={`chat ${
+                  msg.senderId === authUser._id ? "chat-end" : "chat-start"
+                }`}
               >
                 <div
                   className={`chat-bubble relative break-words ${
@@ -59,25 +61,32 @@ function ChatContainer() {
                   }`}
                 >
                   {msg.image && (
-                    <img src={msg.image} alt="Shared" className="rounded-lg max-w-[200px] md:h-48 md:max-w-full object-cover" />
+                    <img
+                      src={msg.image}
+                      alt="Shared"
+                      className="rounded-lg max-w-[200px] md:h-48 md:max-w-full object-cover"
+                    />
                   )}
+
                   {msg.text && <p className="mt-1 md:mt-2">{msg.text}</p>}
+
                   <p className="text-xs mt-1 opacity-75 flex items-center gap-1 justify-end">
                     {new Date(msg.createdAt).toLocaleTimeString(undefined, {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
-                    {msg.senderId === authUser._id && (
-                      msg.isSeen ? (
+
+                    {msg.senderId === authUser._id &&
+                      (msg.isSeen ? (
                         <CheckCheck className="w-3 h-3 text-cyan-300" />
                       ) : (
                         <Check className="w-3 h-3 text-slate-300" />
-                      )
-                    )}
+                      ))}
                   </p>
                 </div>
               </div>
             ))}
+
             {isTyping && (
               <div className="chat chat-start">
                 <div className="chat-bubble bg-slate-800 text-slate-200 flex items-center gap-1">
@@ -87,7 +96,7 @@ function ChatContainer() {
                 </div>
               </div>
             )}
-            {/* 👇 scroll target */}
+
             <div ref={messageEndRef} className="h-1" />
           </div>
         ) : isMessagesLoading ? (
