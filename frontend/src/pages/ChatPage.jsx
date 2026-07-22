@@ -12,7 +12,13 @@ import FriendSearch from "../components/FriendSearch";
 import FriendRequests from "../components/FriendRequests";
 
 function ChatPage() {
-  const { activeTab, selectedUser, allContacts, getAllContacts, getMyChatPartners } = useChatStore();
+  const {
+    activeTab,
+    selectedUser,
+    allContacts,
+    getAllContacts,
+    getMyChatPartners,
+  } = useChatStore();
 
   useEffect(() => {
     getAllContacts();
@@ -20,10 +26,14 @@ function ChatPage() {
   }, [getAllContacts, getMyChatPartners]);
 
   return (
-    <div className="w-full h-full md:h-[90vh] md:max-w-7xl">
-      <BorderAnimatedContainer>
-        {/* LEFT SIDE - Contacts (only show on mobile if no selected user) */}
-        <div className={`${selectedUser ? "hidden md:flex" : "flex"} w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex-col h-full`}>
+    <div className="relative w-full max-w-7xl h-[100dvh] md:h-[90vh] p-0 md:p-2">
+      <BorderAnimatedContainer className="h-full">
+        {/* LEFT SIDE - Contacts */}
+        <div
+          className={`${
+            selectedUser ? "hidden md:flex" : "flex"
+          } w-full md:w-80 bg-slate-800/50 backdrop-blur-sm flex-col h-full`}
+        >
           <ProfileHeader />
           <FriendSearch />
           <FriendRequests />
@@ -37,18 +47,25 @@ function ChatPage() {
             ) : (
               <div className="text-center text-slate-400 py-10">
                 <p className="text-sm">No friends yet</p>
-                <p className="text-xs mt-1">Search and add friends to start chatting!</p>
+                <p className="text-xs mt-1">
+                  Search and add friends to start chatting!
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* RIGHT SIDE - Chat (show on mobile if selected user) */}
-        <div className={`${selectedUser ? "flex" : "hidden md:flex"} flex-1 flex-col bg-slate-900/50 backdrop-blur-sm h-full`}>
+        {/* RIGHT SIDE - Chat */}
+        <div
+          className={`${
+            selectedUser ? "flex" : "hidden md:flex"
+          } flex-1 flex-col bg-slate-900/50 backdrop-blur-sm h-full overflow-hidden`}
+        >
           {selectedUser ? <ChatContainer /> : <NoConversationPlaceholder />}
         </div>
       </BorderAnimatedContainer>
     </div>
   );
 }
+
 export default ChatPage;

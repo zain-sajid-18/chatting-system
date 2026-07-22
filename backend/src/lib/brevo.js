@@ -10,6 +10,7 @@ const sender = {
 };
 
 if (env.BREVO_API_KEY) {
+  logger.info("Initializing Brevo email service...");
   brevoClient = new BrevoClient({
     apiKey: env.BREVO_API_KEY,
   });

@@ -21,8 +21,7 @@ function FriendSearch() {
           placeholder="Search user by email..."
           value={searchEmail}
           onChange={(e) => setSearchEmail(e.target.value)}
-          className="flex-1 bg-slate-700/50 text-slate-200 px-3 py-3 md:py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
-          autoComplete="off"
+          className="flex-1 bg-slate-700/50 text-slate-200 px-3 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 min-h-[44px]"
         />
         <button
           type="submit"

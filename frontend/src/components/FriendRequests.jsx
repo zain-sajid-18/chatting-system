@@ -92,6 +92,7 @@ function FriendRequests() {
               <button
                 onClick={() => cancelFriendRequest(req.receiver._id)}
                 className="bg-slate-600 hover:bg-slate-500 text-white p-2 rounded-lg transition-colors min-h-[44px] min-w-[44px] shrink-0"
+                className="bg-slate-600 hover:bg-slate-500 text-white p-2 rounded-lg transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
               >
                 <XCircle className="size-5" />
               </button>

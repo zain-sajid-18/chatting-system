@@ -20,6 +20,7 @@ const sendEmail = async ({
   }
 
   try {
+    logger.info(`4. Brevo API request started for email: ${to}`);
     const response =
       await brevoClient.transactionalEmails.sendTransacEmail({
         sender: {
@@ -39,9 +40,7 @@ const sendEmail = async ({
         htmlContent: html,
       });
 
-    logger.info(
-      `Email sent successfully to ${to}. Message ID: ${response.messageId}`
-    );
+    logger.info(`5. Brevo email sent successfully to ${to}. Message ID: ${response.messageId}`);
 
     return response;
   } catch (error) {
@@ -50,6 +49,11 @@ const sendEmail = async ({
         error?.message || error
       }`
     );
+
+    // Log more error details if available
+    if (error?.response?.data) {
+      logger.error(`Brevo API error details for ${to}: ${JSON.stringify(error.response.data)}`);
+    }
 
     throw error;
   }

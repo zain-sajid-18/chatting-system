@@ -1,21 +1,19 @@
-
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cookieParser from "cookie-parser";
-import path from "path";
 import helmet from "helmet";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
+
 import { connectDB } from "./lib/db.js";
 import { env } from "./lib/env.js";
 import logger from "./lib/logger.js";
 import { errorHandler } from "./middleware/error.middleware.js";
+
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import friendRoutes from "./routes/friend.route.js";
-
-const __dirname = path.resolve();
 
 const app = express();
 const server = http.createServer(app);
@@ -26,6 +24,7 @@ const io = new Server(server, {
     credentials: true,
   },
 });
+
 app.set("io", io);
 
 const userSocketMap = {};
@@ -36,7 +35,9 @@ export const getReceiverSocketId = (receiverId) => {
 
 io.on("connection", (socket) => {
   logger.info(`User connected: ${socket.id}`);
+
   const userId = socket.handshake.query.userId;
+
   if (userId && userId !== "undefined") {
     userSocketMap[userId] = socket.id;
   }
@@ -45,14 +46,22 @@ io.on("connection", (socket) => {
 
   socket.on("typing", ({ senderId, receiverId, isTyping }) => {
     const receiverSocketId = getReceiverSocketId(receiverId);
+
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("typing", { senderId, isTyping });
+      io.to(receiverSocketId).emit("typing", {
+        senderId,
+        isTyping,
+      });
     }
   });
 
   socket.on("disconnect", () => {
     logger.info(`User disconnected: ${socket.id}`);
-    delete userSocketMap[userId];
+
+    if (userId && userId !== "undefined") {
+      delete userSocketMap[userId];
+    }
+
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
@@ -63,10 +72,10 @@ const limiter = rateLimit({
   message: "Too many requests from this IP, please try again later.",
 });
 
-
 app.use(
   helmet({
-    contentSecurityPolicy: env.NODE_ENV === "production" ? undefined : false,
+    contentSecurityPolicy:
+      env.NODE_ENV === "production" ? undefined : false,
   })
 );
 
@@ -76,25 +85,27 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(limiter);
+
 app.use(express.json({ limit: "5mb" }));
+
 app.use(cookieParser());
 
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/friend", friendRoutes);
 
-if (env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-  });
-}
-
+// Health Check
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+  res.status(200).json({
+    status: "ok",
+    environment: env.NODE_ENV,
+  });
 });
 
+// Error Handler
 app.use(errorHandler);
 
 server.listen(env.PORT, () => {

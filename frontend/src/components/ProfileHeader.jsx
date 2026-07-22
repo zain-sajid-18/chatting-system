@@ -74,7 +74,7 @@ function ProfileHeader() {
             className="text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
             onClick={() => setIsProfileModalOpen(true)}
           >
-            <User className="size-5" />
+            <User className="size-5 md:size-6" />
           </button>
 
           {/* LOGOUT BTN */}
@@ -82,7 +82,7 @@ function ProfileHeader() {
             className="text-slate-400 hover:text-slate-200 transition-colors flex items-center justify-center min-w-[44px] min-h-[44px]"
             onClick={logout}
           >
-            <LogOutIcon className="size-5" />
+            <LogOutIcon className="size-5 md:size-6" />
           </button>
 
           {/* SOUND TOGGLE BTN */}
@@ -96,9 +96,9 @@ function ProfileHeader() {
             }}
           >
             {isSoundEnabled ? (
-              <Volume2Icon className="size-5" />
+              <Volume2Icon className="size-5 md:size-6" />
             ) : (
-              <VolumeOffIcon className="size-5" />
+              <VolumeOffIcon className="size-5 md:size-6" />
             )}
           </button>
         </div>
